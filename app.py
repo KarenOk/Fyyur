@@ -3,6 +3,7 @@
 #----------------------------------------------------------------------------#
 
 import json
+import sys
 import dateutil.parser
 import babel
 from flask import Flask, render_template, request, Response, flash, redirect, url_for
@@ -41,6 +42,9 @@ class Venue(db.Model):
     genres = db.Column(db.String, nullable=False)
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
+    website = db.Column(db.String(120))
+    seeking_talent = db.Column(db.Boolean, nullable=False, default=False)
+    seeking_description = db.Column(db.String(500))
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
@@ -234,23 +238,18 @@ def create_venue_submission():
     form = VenueForm(request.form)
 
     if form.validate():
-        name = request.form["name"]
-        city = request.form["city"]
-        state = request.form["state"]
-        address = request.form["address"]
-        phone = request.form["phone"]
-        genres = ",".join(form.genres.data)
-        facebook_link = request.form["facebook_link"]
-
         try:
             new_venue = Venue(
-                name=name,
-                city=city,
-                state=state,
-                address=address,
-                phone=phone,
-                genres=genres,
-                facebook_link=facebook_link
+                name=form.name.data,
+                city=form.city.data,
+                state=form.state.data,
+                address=form.address.data,
+                phone=form.phone.data,
+                genres=",".join(form.genres.data),
+                facebook_link=form.facebook_link.data,
+                image_link=form.image_link.data,
+                seeking_talent=form.seeking_talent.data,
+                website=form.website.data
             )
             db.session.add(new_venue)
             db.session.commit()
@@ -258,6 +257,7 @@ def create_venue_submission():
 
         except Exception:
             db.session.rollback()
+            print(sys.exc_info())
             flash('An error occurred. Venue' + ' could not be listed.')
 
         finally:
