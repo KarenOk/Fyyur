@@ -47,7 +47,8 @@ class Venue(db.Model):
     seeking_description = db.Column(db.String(500))
     shows = db.relationship("Show", backref="shows", lazy=False)
 
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
+    def __repr__(self):
+        return f"<Venue id={self.id} name={self.name} city={self.city} state={self.city}> \n"
 
 
 class Artist(db.Model):
@@ -65,9 +66,8 @@ class Artist(db.Model):
     seeking_venue = db.Column(db.Boolean, nullable=False, default=False)
     seeking_description = db.Column(db.String(500))
     shows = db.relationship("Show", backref="artists", lazy=False)
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
-# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+
 class Show(db.Model):
     __tablename__ = "Show"
 
@@ -75,6 +75,9 @@ class Show(db.Model):
     artist_id = db.Column(db.Integer, db.ForeignKey("Artist.id"), nullable=False)
     venue_id = db.Column(db.Integer, db.ForeignKey("Venue.id"), nullable=False)
     start_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<Show id={self.id} artist_id={self.artist_id} venue_id={self.venue_id} start_time={self.start_time}"
 
 
 #----------------------------------------------------------------------------#
@@ -108,29 +111,27 @@ def index():
 
 @app.route('/venues')
 def venues():
-    # TODO: replace with real venues data.
-    #       num_shows should be aggregated based on number of upcoming shows per venue.
-    data = [{
-        "city": "San Francisco",
-        "state": "CA",
-        "venues": [{
-            "id": 1,
-            "name": "The Musical Hop",
-            "num_upcoming_shows": 0,
-        }, {
-            "id": 3,
-            "name": "Park Square Live Music & Coffee",
-            "num_upcoming_shows": 1,
-        }]
-    }, {
-        "city": "New York",
-        "state": "NY",
-        "venues": [{
-            "id": 2,
-            "name": "The Dueling Pianos Bar",
-            "num_upcoming_shows": 0,
-        }]
-    }]
+    data = []
+    results = Venue.query.distinct(Venue.city, Venue.state).all()
+    for result in results:
+        city_state_unit = {
+            "city": result.city,
+            "state": result.state
+        }
+        venues = Venue.query.filter_by(city=result.city, state=result.state).all()
+
+        # format each venue
+        formatted_venues = []
+        for venue in venues:
+            formatted_venues.append({
+                "id": venue.id,
+                "name": venue.name,
+                "num_upcoming_shows": len(list(filter(lambda x: x.start_time > datetime.now(), venue.shows)))
+            })
+        
+        city_state_unit["venues"] = formatted_venues
+        data.append(city_state_unit)
+   
     return render_template('pages/venues.html', areas=data)
 
 
