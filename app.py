@@ -24,8 +24,6 @@ db = SQLAlchemy(app)
 
 migrate = Migrate(app, db)
 
-# TODO: connect to a local postgresql database
-
 #----------------------------------------------------------------------------#
 # Models.
 #----------------------------------------------------------------------------#
@@ -261,7 +259,7 @@ def create_venue_submission():
         except Exception:
             db.session.rollback()
             flash('An error occurred. Venue' + ' could not be listed.')
-            
+
         finally:
             db.session.close()
     else:
