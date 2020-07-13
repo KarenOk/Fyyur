@@ -45,6 +45,7 @@ class Venue(db.Model):
     website = db.Column(db.String(120))
     seeking_talent = db.Column(db.Boolean, nullable=False, default=False)
     seeking_description = db.Column(db.String(500))
+    shows = db.relationship("Show", backref="shows", lazy=False)
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
@@ -63,9 +64,18 @@ class Artist(db.Model):
     website = db.Column(db.String(120))
     seeking_venue = db.Column(db.Boolean, nullable=False, default=False)
     seeking_description = db.Column(db.String(500))
+    shows = db.relationship("Show", backref="artists", lazy=False)
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+class Show(db.Model):
+    __tablename__ = "Show"
+
+    id = db.Column(db.Integer, primary_key=True)
+    artist_id = db.Column(db.Integer, db.ForeignKey("Artist.id"), nullable=False)
+    venue_id = db.Column(db.Integer, db.ForeignKey("Venue.id"), nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -554,14 +564,28 @@ def create_shows():
 
 @app.route('/shows/create', methods=['POST'])
 def create_show_submission():
-    # called to create new shows in the db, upon submitting new show listing form
-    # TODO: insert form data as a new Show record in the db, instead
+    form = ShowForm(request.form)
+    
+    if form.validate():
+        try:
+            new_show = Show(
+                artist_id=form.artist_id.data,
+                venue_id=form.venue_id.data,
+                start_time=form.start_time.data
+            )
+            db.session.add(new_show)
+            db.session.commit()
+            flash('Show was successfully listed!')
+        except Exception:
+            db.session.rollback()
+            print(sys.exc_info())
+            flash('Show was not successfully listed.')
+        finally:
+            db.session.close()
+    else:
+        print(form.errors)
+        flash('Show was not successfully listed.')
 
-    # on successful db insert, flash success
-    flash('Show was successfully listed!')
-    # TODO: on unsuccessful db insert, flash an error instead.
-    # e.g., flash('An error occurred. Show could not be listed.')
-    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
     return render_template('pages/home.html')
 
 
