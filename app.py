@@ -244,8 +244,6 @@ def create_venue_submission():
         genres = ",".join(form.genres.data)
         facebook_link = request.form["facebook_link"]
 
-        # TODO: insert form data as a new Venue record in the db, instead
-        # TODO: modify data to be the data object returned from db insertion
         try:
             new_venue = Venue(
                 name=name,
@@ -259,9 +257,11 @@ def create_venue_submission():
             db.session.add(new_venue)
             db.session.commit()
             flash('Venue ' + request.form['name'] + ' was successfully listed!')
+
         except Exception:
             db.session.rollback()
             flash('An error occurred. Venue' + ' could not be listed.')
+            
         finally:
             db.session.close()
     else:
