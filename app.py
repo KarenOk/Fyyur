@@ -53,14 +53,16 @@ class Artist(db.Model):
     __tablename__ = 'Artist'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
+    name = db.Column(db.String, nullable=False)
+    city = db.Column(db.String(120), nullable=False)
+    state = db.Column(db.String(120), nullable=False)
     phone = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
+    genres = db.Column(db.String(120), nullable=False)
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
-
+    website = db.Column(db.String(120))
+    seeking_venue = db.Column(db.Boolean, nullable=False, default=False)
+    seeking_description = db.Column(db.String(500))
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
@@ -464,15 +466,35 @@ def create_artist_form():
 
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
-    # called upon submitting the new artist listing form
-    # TODO: insert form data as a new Venue record in the db, instead
-    # TODO: modify data to be the data object returned from db insertion
+    form = ArtistForm(request.form)
 
-    # on successful db insert, flash success
-    flash('Artist ' + request.form['name'] + ' was successfully listed!')
-    # TODO: on unsuccessful db insert, flash an error instead.
-    # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
-    return render_template('pages/home.html')
+    if form.validate():
+        try:
+            new_artist = Artist(
+                name=form.name.data,
+                city=form.city.data,
+                state=form.state.data,
+                phone=form.phone.data,
+                genres=",".join(form.genres.data),
+                image_link=form.image_link.data,
+                facebook_link=form.facebook_link.data,
+                website=form.website.data,
+                seeking_venue=form.seeking_venue.data,
+                seeking_description=form.seeking_description.data,
+            )
+            db.session.add(new_artist)
+            db.session.commit()
+            flash("Artist " + request.form["name"] + " was successfully listed!")
+        except Exception:
+            db.session.rollback()
+            flash("Artist was not successfully listed.")
+        finally:
+            db.session.close()
+    else:
+        print(form.errors)
+        flash("Artist was not successfully listed.")
+
+    return render_template("pages/home.html")
 
 
 #  Shows
