@@ -419,28 +419,44 @@ def show_artist(artist_id):
 
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
-    form = ArtistForm()
-    artist = {
-        "id": 4,
-        "name": "Guns N Petals",
-        "genres": ["Rock n Roll"],
-        "city": "San Francisco",
-        "state": "CA",
-        "phone": "326-123-5000",
-        "website": "https://www.gunsnpetalsband.com",
-        "facebook_link": "https://www.facebook.com/GunsNPetals",
-        "seeking_venue": True,
-        "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
-        "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
-    }
-    # TODO: populate form with fields from artist with ID <artist_id>
+    form = ArtistForm()  
+    artist = Artist.query.get(artist_id)
+    form.genres.data = artist.genres.split(",")
+    
     return render_template('forms/edit_artist.html', form=form, artist=artist)
 
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
-    # TODO: take values from the form submitted, and update existing
-    # artist record with ID <artist_id> using the new attributes
+    form = ArtistForm(request.form)
+
+    if form.validate():
+        try:
+            artist = Artist.query.get(artist_id)
+
+            artist.name = form.name.data
+            artist.city=form.city.data
+            artist.state=form.state.data
+            artist.phone=form.phone.data
+            artist.genres=",".join(form.genres.data)
+            artist.facebook_link=form.facebook_link.data
+            artist.image_link=form.image_link.data
+            artist.seeking_venue=form.seeking_venue.data
+            artist.seeking_description=form.seeking_description.data
+            artist.website=form.website.data
+
+            db.session.add(artist)
+            db.session.commit()
+            flash("Artist " + artist.name + " was successfully edited!")
+        except:
+            db.session.rollback()
+            print(sys.exc_info())
+            flash("Artist was not edited successfully.")
+        finally:
+            db.session.close()
+    else:
+        print("\n\n", form.errors)
+        flash("Artist was not edited successfully.")
 
     return redirect(url_for('show_artist', artist_id=artist_id))
 

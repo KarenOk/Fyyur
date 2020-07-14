@@ -40,6 +40,17 @@
 			<i class="fas fa-moon"></i> Not currently seeking performance artists
 		</p>
 		{% endif %}
+
+		<div class="actions">
+			<a class="btn btn-primary btn-block" aria-label="Edit artist: {{ artist.name }}"
+				href="/artists/{{ artist.id }}/edit">
+				Edit artist
+			</a>
+			<a class="btn btn-danger btn-block" aria-label="Delete artist: {{ artist.name }}"
+				href="/artists/{{ artist.id }}/delete">
+				Delete this artist
+			</a>
+		</div>
 	</div>
 	<div class="col-sm-6">
 		<img src="{{ artist.image_link }}" alt="artist Image" />
