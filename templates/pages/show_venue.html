@@ -54,17 +54,29 @@ block content %}
 		</p>
 		{% endif %}
 
-		<form class="delete" method="get" action="/venues/{{ venue.id }}/delete">
-			<button
-				class="btn btn-danger"
+		<div class="actions">
+			<a
+				class="btn btn-primary btn-block"
+				aria-label="Edit venue: {{ venue.name }}"
+				href="/venues/{{ venue.id }}/edit"
+			>
+				Edit venue
+			</a>
+			<a
+				class="btn btn-danger btn-block"
 				aria-label="Delete venue: {{ venue.name }}"
+				href="/venues/{{ venue.id }}/delete"
 			>
 				Delete this venue
-			</button>
-		</form>
+			</a>
+		</div>
 	</div>
 	<div class="col-sm-6">
-		<img src="{{ venue.image_link }}" alt="Venue Image" />
+		{% if venue.image_link %}<img
+			src="{{ venue.image_link }}"
+			alt="Venue Image"
+		/>
+		{% else%} No image provided {% endif%}
 	</div>
 </div>
 <section>
