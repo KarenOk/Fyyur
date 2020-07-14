@@ -507,6 +507,26 @@ def create_artist_submission():
 
     return render_template("pages/home.html")
 
+
+#  Delete
+#  ----------------------------------------------------------------
+@app.route("/artists/<artist_id>/delete", methods={"GET"})
+def delete_artist(artist_id):
+    try:
+        artist = Artist.query.get(artist_id)
+        db.session.delete(artist)
+        db.session.commit()
+        flash("Artist " + artist.name+ " was deleted successfully!")
+    except:
+        db.session.rollback()
+        print(sys.exc_info())
+        flash("Artist was not deleted successfully.")
+    finally:
+        db.session.close()
+
+    return redirect(url_for("index"))
+
+
 #  Shows
 #  ----------------------------------------------------------------
 
