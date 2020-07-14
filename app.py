@@ -267,7 +267,6 @@ def create_venue_submission():
 
 @app.route('/venues/<venue_id>/delete', methods=['GET'])
 def delete_venue(venue_id):
-    print(f"\n\n Delete {venue_id}!\n\n")
     try:
         venue = Venue.query.get(venue_id)
         venue_name = venue.name
@@ -297,7 +296,6 @@ def edit_venue(venue_id):
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
 def edit_venue_submission(venue_id):
     form = VenueForm(request.form)
-    print("\n\n", form.seeking_talent.data)
     
     if form.validate():
         try:
