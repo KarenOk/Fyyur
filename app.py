@@ -244,6 +244,7 @@ def create_venue_submission():
                 facebook_link=form.facebook_link.data,
                 image_link=form.image_link.data,
                 seeking_talent=form.seeking_talent.data,
+                seeking_description=form.seeking_description.data,
                 website=form.website.data
             )
             db.session.add(new_venue)
