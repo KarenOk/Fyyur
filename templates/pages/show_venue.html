@@ -53,6 +53,15 @@ block content %}
 			<i class="fas fa-moon"></i> Not currently seeking talent
 		</p>
 		{% endif %}
+
+		<form class="delete" method="get" action="/venues/{{ venue.id }}/delete">
+			<button
+				class="btn btn-danger"
+				aria-label="Delete venue: {{ venue.name }}"
+			>
+				Delete this venue
+			</button>
+		</form>
 	</div>
 	<div class="col-sm-6">
 		<img src="{{ venue.image_link }}" alt="Venue Image" />
