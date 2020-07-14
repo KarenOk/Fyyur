@@ -146,26 +146,6 @@ def venues():
     return render_template('pages/venues.html', areas=data)
 
 
-@app.route('/venues/search', methods=['POST'])
-def search_venues():
-    search_term = request.form.get("search_term", "")
-
-    response = {}
-    venues = list(Venue.query.filter(Venue.name.ilike(f"%{search_term}%")).all())
-    response["count"] = len(venues)
-    response["data"] = []
-
-    for venue in venues:
-        venue_unit = {
-            "id": venue.id,
-            "name": venue.name,
-            "num_upcoming_shows": len(list(filter(lambda x: x.start_time > datetime.now(), venue.shows)))
-        }
-        response["data"].append(venue_unit)
-
-    return render_template('pages/search_venues.html', results=response, search_term=search_term)
-
-
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
     venue = Venue.query.get(venue_id)
@@ -265,24 +245,8 @@ def create_venue_submission():
     return render_template('pages/home.html')
 
 
-@app.route('/venues/<venue_id>/delete', methods=['GET'])
-def delete_venue(venue_id):
-    try:
-        venue = Venue.query.get(venue_id)
-        venue_name = venue.name
-        db.session.delete(venue)
-        db.session.commit()
-        flash("Venue " + venue_name + " was successfuly deleted!")
-    except Exception:
-        db.session.rollback()
-        print(sys.exc_info())
-        flash("Venue " + venue_name + " was not successfuly deleted.")
-    finally:
-        db.session.close()
-
-    return redirect(url_for("index"))
-
-
+#  Update Venue
+#  ----------------------------------------------------------------
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
@@ -332,6 +296,48 @@ def edit_venue_submission(venue_id):
 
 
 
+#  Delete Venue
+#  ----------------------------------------------------------------
+
+@app.route("/venues/<venue_id>/delete", methods={"GET"})
+def delete_venue(venue_id):
+    try:
+        venue = Venue.query.get(venue_id)
+        db.session.delete(venue)
+        db.session.commit()
+        flash("Venue " + venue.name + " was deleted successfully!")
+    except:
+        db.session.rollback()
+        print(sys.exc_info())
+        flash("Venue was not deleted successfully.")
+    finally:
+        db.session.close()
+
+    return redirect(url_for("index"))
+
+
+#  Search Venue
+#  ----------------------------------------------------------------
+
+@app.route('/venues/search', methods=['POST'])
+def search_venues():
+    search_term = request.form.get("search_term", "")
+
+    response = {}
+    venues = list(Venue.query.filter(Venue.name.ilike(f"%{search_term}%")).all())
+    response["count"] = len(venues)
+    response["data"] = []
+
+    for venue in venues:
+        venue_unit = {
+            "id": venue.id,
+            "name": venue.name,
+            "num_upcoming_shows": len(list(filter(lambda x: x.start_time > datetime.now(), venue.shows)))
+        }
+        response["data"].append(venue_unit)
+
+    return render_template('pages/search_venues.html', results=response, search_term=search_term)
+
 
 
 
@@ -343,35 +349,6 @@ def edit_venue_submission(venue_id):
 def artists():
     artists = db.session.query(Artist.id, Artist.name).all()
     return render_template('pages/artists.html', artists=artists)
-
-
-@app.route('/artists/search', methods=['POST'])
-def search_artists():
-    search_term = request.form.get('search_term', '')
-    artists = Artist.query.filter(Artist.name.ilike(f"%{search_term}%")).all()
-    response = {
-        "count": len(artists),
-        "data": []
-    }
-
-    for artist in artists:
-        temp = {}
-        temp["name"] = artist.name
-        temp["id"] = artist.id
-
-        upcoming_shows = 0
-        for show in artist.shows:
-            if show.start_time > datetime.now():
-                upcoming_shows = upcoming_shows + 1
-        temp["upcoming_shows"] = upcoming_shows
-
-        response["data"].append(temp)
-
-    return render_template('pages/search_artists.html', results=response, search_term=search_term)
-
-
-#  Read
-#  ----------------------------------------------------------------
 
 
 @app.route('/artists/<int:artist_id>')
@@ -417,9 +394,53 @@ def show_artist(artist_id):
 
     return render_template('pages/show_artist.html', artist=artist)
 
-#  Update
+
+#  Create Artist
 #  ----------------------------------------------------------------
 
+
+@app.route('/artists/create', methods=['GET'])
+def create_artist_form():
+    form = ArtistForm()
+    return render_template('forms/new_artist.html', form=form)
+
+
+@app.route('/artists/create', methods=['POST'])
+def create_artist_submission():
+    form = ArtistForm(request.form)
+
+    if form.validate():
+        try:
+            new_artist = Artist(
+                name=form.name.data,
+                city=form.city.data,
+                state=form.state.data,
+                phone=form.phone.data,
+                genres=",".join(form.genres.data),
+                image_link=form.image_link.data,
+                facebook_link=form.facebook_link.data,
+                website=form.website.data,
+                seeking_venue=form.seeking_venue.data,
+                seeking_description=form.seeking_description.data,
+            )
+            db.session.add(new_artist)
+            db.session.commit()
+            flash("Artist " + request.form["name"] + " was successfully listed!")
+        except Exception:
+            db.session.rollback()
+            flash("Artist was not successfully listed.")
+        finally:
+            db.session.close()
+    else:
+        print(form.errors)
+        flash("Artist was not successfully listed.")
+
+    return render_template("pages/home.html")
+
+
+
+#  Update Artist
+#  ----------------------------------------------------------------
 
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
@@ -465,52 +486,10 @@ def edit_artist_submission(artist_id):
     return redirect(url_for('show_artist', artist_id=artist_id))
 
 
-#  Create Artist
+#  Delete Artist
 #  ----------------------------------------------------------------
 
-
-@app.route('/artists/create', methods=['GET'])
-def create_artist_form():
-    form = ArtistForm()
-    return render_template('forms/new_artist.html', form=form)
-
-
-@app.route('/artists/create', methods=['POST'])
-def create_artist_submission():
-    form = ArtistForm(request.form)
-
-    if form.validate():
-        try:
-            new_artist = Artist(
-                name=form.name.data,
-                city=form.city.data,
-                state=form.state.data,
-                phone=form.phone.data,
-                genres=",".join(form.genres.data),
-                image_link=form.image_link.data,
-                facebook_link=form.facebook_link.data,
-                website=form.website.data,
-                seeking_venue=form.seeking_venue.data,
-                seeking_description=form.seeking_description.data,
-            )
-            db.session.add(new_artist)
-            db.session.commit()
-            flash("Artist " + request.form["name"] + " was successfully listed!")
-        except Exception:
-            db.session.rollback()
-            flash("Artist was not successfully listed.")
-        finally:
-            db.session.close()
-    else:
-        print(form.errors)
-        flash("Artist was not successfully listed.")
-
-    return render_template("pages/home.html")
-
-
-#  Delete
-#  ----------------------------------------------------------------
-@app.route("/artists/<artist_id>/delete", methods={"GET"})
+@app.route("/artists/<artist_id>/delete", methods=["GET"])
 def delete_artist(artist_id):
     try:
         artist = Artist.query.get(artist_id)
@@ -525,6 +504,38 @@ def delete_artist(artist_id):
         db.session.close()
 
     return redirect(url_for("index"))
+
+
+
+#  Search Artist
+#  ----------------------------------------------------------------
+
+@app.route('/artists/search', methods=['POST'])
+def search_artists():
+    search_term = request.form.get('search_term', '')
+    artists = Artist.query.filter(Artist.name.ilike(f"%{search_term}%")).all()
+    response = {
+        "count": len(artists),
+        "data": []
+    }
+
+    for artist in artists:
+        temp = {}
+        temp["name"] = artist.name
+        temp["id"] = artist.id
+
+        upcoming_shows = 0
+        for show in artist.shows:
+            if show.start_time > datetime.now():
+                upcoming_shows = upcoming_shows + 1
+        temp["upcoming_shows"] = upcoming_shows
+
+        response["data"].append(temp)
+
+    return render_template('pages/search_artists.html', results=response, search_term=search_term)
+
+
+
 
 
 #  Shows
@@ -571,6 +582,7 @@ def shows():
         "artist_image_link": "https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80",
         "start_time": "2035-04-15T20:00:00.000Z"
     }]
+    
     return render_template('pages/shows.html', shows=data)
 
 
