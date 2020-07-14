@@ -370,10 +370,14 @@ def search_artists():
     return render_template('pages/search_artists.html', results=response, search_term=search_term)
 
 
+#  Read
+#  ----------------------------------------------------------------
+
+
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
 
-    artist = Artist.query.get(4)
+    artist = Artist.query.get(artist_id)
     setattr(artist, "genres", artist.genres.split(","))
 
     # get past shows
@@ -502,7 +506,6 @@ def create_artist_submission():
         flash("Artist was not successfully listed.")
 
     return render_template("pages/home.html")
-
 
 #  Shows
 #  ----------------------------------------------------------------
