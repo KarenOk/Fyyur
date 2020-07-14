@@ -343,35 +343,33 @@ def edit_venue_submission(venue_id):
 
 @app.route('/artists')
 def artists():
-    data = [{
-        "id": 4,
-        "name": "Guns N Petals",
-    }, {
-        "id": 5,
-        "name": "Matt Quevedo",
-    }, {
-        "id": 6,
-        "name": "The Wild Sax Band",
-    }]
     artists = db.session.query(Artist.id, Artist.name).all()
-
     return render_template('pages/artists.html', artists=artists)
 
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
-    # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
-    # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
-    # search for "band" should return "The Wild Sax Band".
+    search_term = request.form.get('search_term', '')
+    artists = Artist.query.filter(Artist.name.ilike(f"%{search_term}%")).all()
     response = {
-        "count": 1,
-        "data": [{
-            "id": 4,
-            "name": "Guns N Petals",
-            "num_upcoming_shows": 0,
-        }]
+        "count": len(artists),
+        "data": []
     }
-    return render_template('pages/search_artists.html', results=response, search_term=request.form.get('search_term', ''))
+
+    for artist in artists:
+        temp = {}
+        temp["name"] = artist.name
+        temp["id"] = artist.id
+
+        upcoming_shows = 0
+        for show in artist.shows:
+            if show.start_time > datetime.now():
+                upcoming_shows = upcoming_shows + 1
+        temp["upcoming_shows"] = upcoming_shows
+
+        response["data"].append(temp)
+
+    return render_template('pages/search_artists.html', results=response, search_term=search_term)
 
 
 @app.route('/artists/<int:artist_id>')
