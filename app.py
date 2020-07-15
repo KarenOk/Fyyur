@@ -229,7 +229,7 @@ def create_venue_submission():
         print("\n\n", form.errors)
         flash('An error occurred. Venue' + ' could not be listed.')
 
-    return render_template('pages/home.html')
+    return redirect(url_for("index"))
 
 
 #  Update Venue
@@ -422,7 +422,6 @@ def create_artist_submission():
         print(form.errors)
         flash("Artist was not successfully listed.")
 
-    # return render_template("pages/home.html")
     return redirect(url_for("index"))
 
 
@@ -583,7 +582,7 @@ def create_show_submission():
         print(form.errors)
         flash('Show was not successfully listed.')
 
-    return render_template('pages/home.html')
+    return redirect(url_for("index"))
 
 
 @app.errorhandler(404)
