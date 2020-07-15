@@ -149,7 +149,7 @@ def venues():
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
     venue = Venue.query.get(venue_id)
-    setattr(venue, "genres", venue.genres.split(","))
+    setattr(venue, "genres", venue.genres.split(",")) # convert genre string back to array
 
     # get past shows
     past_shows = list(filter(lambda show: show.start_time < datetime.now(), venue.shows))
@@ -203,7 +203,7 @@ def create_venue_submission():
                 state=form.state.data,
                 address=form.address.data,
                 phone=form.phone.data,
-                genres=",".join(form.genres.data),
+                genres=",".join(form.genres.data), # convert array to string separated by commas
                 facebook_link=form.facebook_link.data,
                 image_link=form.image_link.data,
                 seeking_talent=form.seeking_talent.data,
@@ -235,7 +235,7 @@ def create_venue_submission():
 def edit_venue(venue_id):
     form = VenueForm()
     venue = Venue.query.get(venue_id)
-    form.genres.data = venue.genres.split(",")
+    form.genres.data = venue.genres.split(",") # convert genre string back to array
     
     return render_template('forms/edit_venue.html', form=form, venue=venue)
 
@@ -253,7 +253,7 @@ def edit_venue_submission(venue_id):
             venue.state=form.state.data
             venue.address=form.address.data
             venue.phone=form.phone.data
-            venue.genres=",".join(form.genres.data)
+            venue.genres=",".join(form.genres.data) # convert array to string separated by commas
             venue.facebook_link=form.facebook_link.data
             venue.image_link=form.image_link.data
             venue.seeking_talent=form.seeking_talent.data
@@ -338,7 +338,7 @@ def artists():
 def show_artist(artist_id):
 
     artist = Artist.query.get(artist_id)
-    setattr(artist, "genres", artist.genres.split(","))
+    setattr(artist, "genres", artist.genres.split(",")) # convert genre string back to array
 
     # get past shows
     past_shows = list(filter(lambda show: show.start_time < datetime.now(), artist.shows))
@@ -395,7 +395,7 @@ def create_artist_submission():
                 city=form.city.data,
                 state=form.state.data,
                 phone=form.phone.data,
-                genres=",".join(form.genres.data),
+                genres=",".join(form.genres.data), # convert array to string separated by commas
                 image_link=form.image_link.data,
                 facebook_link=form.facebook_link.data,
                 website=form.website.data,
@@ -425,7 +425,7 @@ def create_artist_submission():
 def edit_artist(artist_id):
     form = ArtistForm()  
     artist = Artist.query.get(artist_id)
-    form.genres.data = artist.genres.split(",")
+    form.genres.data = artist.genres.split(",") # convert genre string back to array
     
     return render_template('forms/edit_artist.html', form=form, artist=artist)
 
@@ -442,7 +442,7 @@ def edit_artist_submission(artist_id):
             artist.city=form.city.data
             artist.state=form.state.data
             artist.phone=form.phone.data
-            artist.genres=",".join(form.genres.data)
+            artist.genres=",".join(form.genres.data) # convert array to string separated by commas
             artist.facebook_link=form.facebook_link.data
             artist.image_link=form.image_link.data
             artist.seeking_venue=form.seeking_venue.data
