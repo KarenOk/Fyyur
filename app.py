@@ -307,7 +307,11 @@ def search_venues():
     search_term = request.form.get("search_term", "")
 
     response = {}
-    venues = list(Venue.query.filter(Venue.name.ilike(f"%{search_term}%")).all())
+    venues = list(Venue.query.filter(
+        Venue.name.ilike(f"%{search_term}%") |
+        Venue.state.ilike(f"%{search_term}%") |
+        Venue.city.ilike(f"%{search_term}%") 
+    ).all())
     response["count"] = len(venues)
     response["data"] = []
 
@@ -492,7 +496,11 @@ def delete_artist(artist_id):
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
     search_term = request.form.get('search_term', '')
-    artists = Artist.query.filter(Artist.name.ilike(f"%{search_term}%")).all()
+    artists = Artist.query.filter(
+        Artist.name.ilike(f"%{search_term}%") |
+        Artist.city.ilike(f"%{search_term}%") |
+        Artist.state.ilike(f"%{search_term}%")
+    ).all()
     response = {
         "count": len(artists),
         "data": []
