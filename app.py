@@ -45,6 +45,7 @@ class Venue(db.Model):
     website = db.Column(db.String(120))
     seeking_talent = db.Column(db.Boolean, nullable=False, default=False)
     seeking_description = db.Column(db.String(500))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     shows = db.relationship("Show", backref="venues", lazy=False, cascade="all, delete-orphan")
 
     def __repr__(self):
@@ -65,6 +66,7 @@ class Artist(db.Model):
     website = db.Column(db.String(120))
     seeking_venue = db.Column(db.Boolean, nullable=False, default=False)
     seeking_description = db.Column(db.String(500))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     shows = db.relationship("Show", backref="artists", lazy=False, cascade="all, delete-orphan")
 
 
@@ -112,7 +114,9 @@ def orm_obj_list_to_dict(obj_list):
 
 @app.route('/')
 def index():
-    return render_template('pages/home.html')
+    venues = Venue.query.order_by(db.desc(Venue.created_at)).limit(10).all()
+    artists = Artist.query.order_by(db.desc(Artist.created_at)).limit(10).all()
+    return render_template('pages/home.html', venues=venues, artists=artists)
 
 
 
@@ -418,7 +422,8 @@ def create_artist_submission():
         print(form.errors)
         flash("Artist was not successfully listed.")
 
-    return render_template("pages/home.html")
+    # return render_template("pages/home.html")
+    return redirect(url_for("index"))
 
 
 
