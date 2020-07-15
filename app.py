@@ -345,9 +345,9 @@ def show_artist(artist_id):
     temp_shows = []
     for show in past_shows:
         temp = {}
-        temp["artist_name"] = show.artists.name
-        temp["artist_id"] = show.artists.id
-        temp["artist_image_link"] = show.artists.image_link
+        temp["venue_name"] = show.venues.name
+        temp["venue_id"] = show.venues.id
+        temp["venue_image_link"] = show.venues.image_link
         temp["start_time"] = show.start_time.strftime("%m/%d/%Y, %H:%M:%S")
 
         temp_shows.append(temp)
@@ -361,9 +361,9 @@ def show_artist(artist_id):
     temp_shows = []
     for show in upcoming_shows:
         temp = {}
-        temp["artist_name"] = show.artists.name
-        temp["artist_id"] = show.artists.id
-        temp["artist_image_link"] = show.artists.image_link
+        temp["venue_name"] = show.venues.name
+        temp["venue_id"] = show.venues.id
+        temp["venue_image_link"] = show.venues.image_link
         temp["start_time"] = show.start_time.strftime("%m/%d/%Y, %H:%M:%S")
 
         temp_shows.append(temp)
